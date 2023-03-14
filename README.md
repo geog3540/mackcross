@@ -2,4 +2,20 @@
 This project looks at overall spatial trends in primate evolution. 
 
 # DATA ACQUISITION
-On March 3rd, 2023, data was downloaded from https://paleobiodb.org/#/. There were two downloaded spreadsheets: one focused on specimens and another focused on taxa. The specimen download contained some coordinate information, primarily regarding specimens found in the U.S., which was why both were downloaded. I deleted columns irrelevant columns, but these were the only changes made to the "accepted_primates_edit.csv" file. This file and the unedited coordinate file spreadsheets were imported into R were they were merged together based on accepted name. I downloaded a .csv file which included all entries and a separate .csv file which contained only the entries which had coordinate values associated. 
+On March 14th, 2023, data was downloaded from https://paleobiodb.org/#/. There were two downloaded spreadsheets: one focused on specimens and another focused on taxa. 
+
+For the first spreadsheet, the following selections were made: 
+1) "Specimens" was selected
+2) In the "Select by taxonomy" option, "primates" was typed
+3) In the "Choose output options" option, "reference", "coordinates" and "classification" were selected 
+This downloaded file was saved as "specimens_original.csv." 
+
+For the second spreadsheet, the following selections were made: 
+1) "Taxa" was selected
+2) In the "Select by taxonomy" option, "primates" was typed
+3) In the "Select by taxonomy" option, "species" was selected for "Taxonomic rank(s):" 
+4) In the "Choose output options" option, "reference" and "classification" were selected 
+This downloaded file was saved as "taxa_original.csv." 
+
+Both of these spreadsheets were used as the first spreadsheet contains some pre-existing coordinate data, while the second spreadsheet contains information on extinct/extant status. I imported these spreadsheets into R for cleaning. Please see .R file, which has the code used to clean with commented explanations. 
+
