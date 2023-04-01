@@ -23,9 +23,17 @@ df2 <- distinct(df)
 
 df3 <- subset(df2, state != "Fayum" | is.na(state))
 
+df3$genus <- df3$accepted_name
+names(df3)
+df$genus <- gsub("_", " ", df$genus, fixed=TRUE)
+
 getwd()
 # Set new working directly in console 
-write_csv(df3, "cleaned_primate_data.csv")
+# write_csv(df3, "cleaned_primate_data.csv")
+
+
+
+
 
 
 
