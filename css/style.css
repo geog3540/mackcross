@@ -1,14 +1,14 @@
-
-        <style>
-        p {
-        background-color: #dddddd
-                }
+<style>
+p {
+background-color: #dddddd
+}
                 
-        h1 {    
-                font-family: Verdana, Geneva, sans-serif;
-                }
-                </style>
+h1 {    
+font-family: Verdana, Geneva, sans-serif;
+background-color: #dddddd
+}
 
-	a:hover {
-		color: green
-			}
+a:hover {
+color: green
+}
+</style>
