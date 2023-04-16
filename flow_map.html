@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Mack's Portfolio</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/3-col-portfolio.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">Mack's Portfolio</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="index.html">Home
+                <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="bio.pdf">About Mack</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="cv_2.pdf">CV</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="mailto:mackenzie-cross@uiowa.edu">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+
+      <!-- Page Heading -->
+      <h1 class="my-4">Flow Map 
+        <small>Banana Imports</small>
+      </h1> 
+
+      <div class="row">
+		<div class="col-lg-4 col-sm-6 portfolio-item">
+			<img class="card-img-top" src="flowmap2.png" alt="">
+		</div>
+		<p class="card-text"> 
+This is a flow map which depicts banana imports. The data was gathered from https://github.com/geo-social/flowmapper. I made a decision to emphasize banana imports, which shaped the decisions on how to best represent this flow in the map, as described below. </p>
+      	<p class="card-text"> 
+To prioritize the importance of banana imports specifically, the chloropleth portion of the map depicts the import variable. I selected the yellow-green color scheme, as intuitively the yellow is associated with bananas and the regions with the yellow coloration are exporters (implying they are places of banana production), so the map coloration is acknowledging this relationship. Additionally, I choose the natural breaks for the classification method, as the numbers represented ranged dramatically and, after experimenting, it seemed to be the classification that best represented the import data. I chose to use the nodes to depict the total flow of bananas. I experimented with the classification. Again, total flow varied widely from the low end (452) to the high end (476,001). Ultimately, the proportional scale seemed most appropriate, as there were not many nodes and many of the other methods broke the data into many categories, which made reading it unnecessarily cumbersome. The proportional scale seemed to best represent the big idea and kept clutter minimal. I choose to keep the fill color entirely black, as the color gradients made it difficult to visualize the smaller nodes. Initially, I selected all 22 flows to be viewed. However, when the top flows button, I found myself most drawn to the top 16 flows, as this shows the larger picture while reducing much of the visual clutter. Additionally, the curve half arrow was selected. From the discussion of most effective flow line styles, I found myself in agreement with the user study and do not find that the tear drop is a particularly effective method to communicate direction. I also thought the straight lines didn't depict the pattern as well, nor did the tapered. The arrow clearly indicates the user the directionality of flow, which I appreciate and was why I used that style. </p>
+      	<p class="card-text"> Generally, the flows move towards the South. Indeed, the more northern areas are yellow, which shows that they do not have imported bananas and, from this, one can infer that they likely can grow their own bananas there. However, the more southern region has much higher numbers of imported bananas. This information is supported by the direction of the top flows of bananas between countries, as indicated by the flow map arrows. Additionally, The large size of the node in Ecuador paired with its yellow color indicating low imports, shows that Ecuador has a large total flow of bananas due to its exporting to countries such as Chile and Argentina. Indeed, it does appear that Ecuador is the primary exporter of bananas, and they export not only to Chile and Argentina, but also to regions with low rates of banana import, such as Brazil and Peru.  </p>
+      </div>
+      <!-- /.row -->
+
+
+    </div>
+    <!-- /.container -->
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Mack Cross 2023</p>
+      </div>
+      <!-- /.container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  </body>
+
+</html>
