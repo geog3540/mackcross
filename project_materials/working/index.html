@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="//d3js.org/topojson.v1.min.js"></script>
+  <script src="https://unpkg.com/geo-albers-usa-territories@0.1.0/dist/geo-albers-usa-territories.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      color: #696969;
+    }
+
+    #play-button {
+      position: absolute;
+      bottom: 130px;
+      left: 50px;
+      background: #333;
+      padding-right: 26px;
+      border-radius: 3px;
+      border: none;
+      color: white;
+      margin: 0;
+      padding: 0 12px;
+      width: 60px;
+      cursor: pointer;
+      height: 30px;
+    }
+
+    #play-button:hover {
+      background-color: #696969;
+    }
+
+    .ticks {
+      font-size: 10px;
+    }
+
+    .track,
+    .track-inset,
+    .track-overlay {
+      stroke-linecap: round;
+    }
+
+    .track {
+      stroke: #000;
+      stroke-opacity: 0.3;
+      stroke-width: 10px;
+    }
+
+    .track-inset {
+      stroke: #dcdcdc;
+      stroke-width: 8px;
+    }
+
+    .track-overlay {
+      pointer-events: stroke;
+      stroke-width: 50px;
+      stroke: transparent;
+      cursor: crosshair;
+    }
+
+    .handle {
+      fill: #fff;
+      stroke: #000;
+      stroke-opacity: 0.5;
+      stroke-width: 1.25px;
+    }
+
+    #zoom-buttons {
+      position: absolute;
+      margin-left: 10px;
+      margin-top: 10px;
+      padding: 5px;
+      background: #fff;
+    }
+
+    #zoom-buttons button {
+      background: #efefef;
+      color: #231F20;
+      border: 0;
+      padding: 0;
+      border-radius: 2px;
+      width: 25px;
+      height: 25px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="zoom-buttons">
+    <button id="zoom-in">+</button>
+    <button id="zoom-out">-</button>
+  </div>
+  <div id="vis">
+    <button id="play-button">Play</button>
+  </div>
+  <script>
+
+    var formatDateIntoYear = d3.timeFormat("%Y");
+    var formatDate = d3.timeFormat("%b %Y");
+    var parseDate = d3.timeParse("%m/%d/%y");
+
+    var startDate = new Date("2004-11-01"),
+      endDate = new Date("2017-04-01");
+
+    var margin = { top: 50, right: 50, bottom: 0, left: 50 },
+      width = 960 - margin.left - margin.right,
+      height = 750 - margin.top - margin.bottom;
+
+    var svg = d3.select("#vis")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom);
+
+    var projection = geoAlbersUsaTerritories.geoAlbersUsaTerritories()
+      .scale(width + 100)
+      .translate([width / 2, height / 2.2]);
+
+    var path = d3.geoPath()
+      .projection(projection);
+
+    const zoom = d3.zoom()
+      .scaleExtent([1, 10])
+      .on('zoom', zoomed);
+
+    svg.call(zoom)
+    ////////// slider //////////
+
+    var moving = false;
+    var currentValue = 0;
+    var targetValue = width;
+
+    var playButton = d3.select("#play-button");
+
+    var x = d3.scaleTime()
+      .domain([startDate, endDate])
+      .range([0, targetValue])
+      .clamp(true);
+
+    var slider = svg.append("g")
+      .attr("class", "slider")
+      .attr("transform", "translate(" + margin.left + "," + height + ")");
+
+    slider.append("line")
+      .attr("class", "track")
+      .attr("x1", x.range()[0])
+      .attr("x2", x.range()[1])
+      .select(function () { return this.parentNode.appendChild(this.cloneNode(true)); })
+      .attr("class", "track-inset")
+      .select(function () { return this.parentNode.appendChild(this.cloneNode(true)); })
+      .attr("class", "track-overlay")
+      .call(d3.drag()
+        .on("start.interrupt", function () { slider.interrupt(); })
+        .on("start drag", function () {
+          currentValue = d3.event.x;
+          update(x.invert(currentValue));
+        })
+      );
+
+    slider.insert("g", ".track-overlay")
+      .attr("class", "ticks")
+      .attr("transform", "translate(0," + 18 + ")")
+      .selectAll("text")
+      .data(x.ticks(10))
+      .enter()
+      .append("text")
+      .attr("x", x)
+      .attr("y", 10)
+      .attr("text-anchor", "middle")
+      .text(function (d) { return formatDateIntoYear(d); });
+
+    var handle = slider.insert("circle", ".track-overlay")
+      .attr("class", "handle")
+      .attr("r", 9);
+
+    var label = slider.append("text")
+      .attr("class", "label")
+      .attr("text-anchor", "middle")
+      .text(formatDate(startDate))
+      .attr("transform", "translate(0," + (-25) + ")")
+
+
+    ////////// map //////////
+
+    var dataset;
+
+    var layer1 = svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.json("us.json", function (error, us) {
+      if (error) throw error;
+
+      layer1.selectAll("path")
+        .data(topojson.feature(us, us.objects.states).features)
+        .enter().append("path")
+        .attr("d", path)
+        .attr("class", "feature")
+        .attr("stroke", "#ccc")
+        .attr("fill", "#fff")
+
+      layer1.append("path")
+        .datum(topojson.mesh(us, us.objects.states, function (a, b) { return a !== b; }))
+        .attr("class", "mesh")
+        .attr("d", path)
+        .attr('fill', 'none')
+
+    });
+
+    var plot = svg.append("g")
+      .attr("class", "plot")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    let zoomScale = 1; // initial zoom level
+
+    d3.csv("circles.csv", prepare, function (data) {
+      dataset = data;
+      drawPlot(dataset);
+
+      playButton
+        .on("click", function () {
+          var button = d3.select(this);
+          if (button.text() == "Pause") {
+            moving = false;
+            clearInterval(timer);
+            button.text("Play");
+          } else {
+            moving = true;
+            timer = setInterval(step, 100);
+            button.text("Pause");
+          }
+          console.log("Slider moving: " + moving);
+        })
+    })
+
+    function prepare(d) {
+      d.id = d.id;
+      d.date = parseDate(d.date);
+      return d;
+    }
+
+    function step() {
+      update(x.invert(currentValue));
+      currentValue = currentValue + (targetValue / 151);
+      if (currentValue > targetValue) {
+        moving = false;
+        currentValue = 0;
+        clearInterval(timer);
+        // timer = 0;
+        playButton.text("Play");
+        console.log("Slider moving: " + moving);
+      }
+    }
+
+    function drawPlot(data) {
+
+      console.log('zoom scale', zoomScale)
+
+      // update projection based on zoom
+      projection = geoAlbersUsaTerritories.geoAlbersUsaTerritories()
+        .scale((width + 100) * zoomScale) // this works
+        .translate([width / 2, height / 2.2]) // what does this need to be?
+
+      var locations = plot.selectAll(".location")
+        .data(data);
+
+      locations.enter()
+        .append("circle")
+        .attr("class", "location")
+        .attr('cx', d => projection([d.lat, d.lng])[0])
+        .attr('cy', d => projection([d.lat, d.lng])[1])
+        .style("fill", '#333')
+        .style("stroke", '#111')
+        .style("opacity", 0.5)
+        .attr("r", 3)
+        .transition()
+        .duration(400)
+        .attr("r", 8)
+
+      locations.exit()
+        .remove();
+    }
+
+    function update(h) {
+      handle.attr("cx", x(h));
+      label
+        .attr("x", x(h))
+        .text(formatDate(h));
+
+      var newData = dataset.filter(d => d.date < h)
+      drawPlot(newData);
+    }
+
+    function zoomed() {
+
+      zoomScale = d3.event.transform.k
+
+      d3.zoomIdentity
+        .scale(zoomScale)
+
+      layer1
+        .selectAll('path') // To prevent stroke width from scaling
+        .attr('transform', d3.event.transform);
+
+      plot
+        .selectAll('circle')
+        .attr('transform', d3.event.transform);
+
+      plot
+        .selectAll('.city')
+        .attr('transform', d3.event.transform);
+
+    }
+
+    d3.select('#zoom-in').on('click', function () {
+      console.log('zoomin in')
+      zoom.scaleBy(svg.transition().duration(750), 1.3);
+    });
+
+    d3.select('#zoom-out').on('click', function () {
+      zoom.scaleBy(svg.transition().duration(750), 1 / 1.3);
+    });
+
+  </script>
+</body>
