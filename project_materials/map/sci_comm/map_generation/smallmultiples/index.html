@@ -24,41 +24,17 @@
 
 </head>
 <body>
-	<nav class="navbar navbar-default">
-		<div class="container container-fluid">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#defaultNavbar1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
-				<a class="navbar-brand" href="https://geo-social.com">Geog 3540</a>
-			</div>
-			<!-- Collect the nav links, forms, and other content for toggling -->
-			<div class="collapse navbar-collapse" id="defaultNavbar1">
-				<ul class="nav navbar-nav">
-
-					<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span></a>
-						<ul class="dropdown-menu" role="menu">
-							<li><a href="../shortbio.html">About</a></li>
-							<li><a href="../files/koylu_cv_23.pdf">Resume</a></li>
-							<li class="divider"></li>
-							<li><a href="caglar-koylu@uiowa.edu">Contact</a></li>
-						</ul>
-					</li>
-				</ul>
-
-			</div>
-			<!-- /.navbar-collapse -->
-		</div>
-		<!-- /.container-fluid -->
-	</nav>
+	
 
 	<div class="container">
 		<div class="content">
 			<div class="row">
-					<h1>Cancer in Iowa</h1>
+					<h1>Science Education in Rural Iowa</h1>
 			</div>
 			<hr />
 			<div class="row">
 				<div class="col-sm-4">
-					<p>Data from <a href="data.iowa.gov">Data.Iowa.gov</a>, maps by Ryan Larson & Caglar Koylu.</p>
+					<p>Map created by Mack Cross using publicly available Iowa education data.</p>
 				</div>
 				<div class='col-sm-8 mapButtons'>
 					<span class="pull-right">
@@ -82,12 +58,12 @@
 			<br />
 			<div class="row">
 				<div class="col-sm-6">
-					<span><p><h3 class='mapTitle'>Lung Cancer</h3>Yearly average number of deaths from lung cancer per 10,000.</p></span>
+					<span><p><h3 class='mapTitle'>Population Density</h3>Which counties in Iowa have the lowest and highest population densities?</p></span>
 					<div id="divMap1"></div>
 					<div id="divHist1"></div>
 				</div>
 				<div class="col-sm-6">
-					<h3 class='mapTitle'>Adult Smokers</h3><p>Percentage of adult population who smoke.</p>
+					<h3 class='mapTitle'>Percentage of Student Graduates</h3><p>Within 4yrs, what percentage of students graduate?</p>
 					<div id="divMap2"></div>
 					<div id="divHist2"></div>
 				</div>
@@ -95,12 +71,12 @@
 
 			<div class="row">
 				<div class="col-sm-6">
-					<h3 class='mapTitle'>Healthcare Cost</h3><p>Average cost of healthcare.</p>
+					<h3 class='mapTitle'>County Spending Per Student</h3><p>How much do school districts spend per student? All districts within the county were averaged together.</p>
 					<div id="divMap3"></div>
 					<div id="divHist3"></div>
 				</div>
 				<div class="col-sm-6">
-					<h3 class='mapTitle'>Senior Citizens</h3><p>Percentage of population above 65 years old.</p>
+					<h3 class='mapTitle'>Average ACT Science Scores</h3><p>What is the average ACT science score for each county?</p>
 					<div id="divMap4"></div>
 					<div id="divHist4"></div>
 				</div>
@@ -116,7 +92,7 @@
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	// TODO: Change the variables below to customize the small multiples interface for your data
-	var polygonJSONFile = 'data/out.geojson'
+	var polygonJSONFile = 'data/iowaattributes.geojson'
 	// change the projection if needed *d3.geoAlbers()*
 	var projection = d3.geoAlbers();
 	var widthheightRatio = 0.4;
@@ -124,13 +100,13 @@
 	// 0 is the start, whereas 1 i the end of each panel.
 	// If you want to put the legend on the left, then use 0.
 	// legendY = 0.5 puts the legend in the middle of the Y Axis.
-	var legendX = 0.84, legendY = 0.5
+	var legendX = 0.80, legendY = 0.5
 
 	// id attribute and the name attribute to be used in the tooltip
-	var idAttribute = 'FIPS', nameAttribute = 'County';
+	var idAttribute = 'FIPS', nameAttribute = 'CountyName';
 
 	// Find the abbreviations of color names from https://colorbrewer2.org/
-	var colors =  colorbrewer.YlOrBr;
+	var colors =  colorbrewer.BuGn;
 
 	// Chart/map attributes (variables) and formats based on the divs defined above
 	// For attribute 1 (the same for all others), see the description of the parameters below.
@@ -139,22 +115,28 @@
 	// att1format: enter the d3.format string to display the variables in the format you like
 	// Check this link on how to specify the desired format:
 	// https://observablehq.com/@d3/d3-format
-	var att1 = 'lungDeathPerYear', att1alias = 'Lung Cancer Death Density per 10,000', att1format = '.0f',
-	att2 = 'pctSmokers', att2alias =  '% Smokers', att2format = '.0f',
-	att3 = 'healthCosts', att3alias = '$ Spent', att3format = '.0f',
-	att4 = 'numSr', att4alias = '% 65+', att4format = '.0f';
+	
+	//var att1 = 'lungDeathPerYear', att1alias = 'Lung Cancer Death Density per 10,000', att1format = '.0f',
+	//att2 = 'pctSmokers', att2alias =  '% Smokers', att2format = '.0f',
+	//att3 = 'healthCosts', att3alias = '$ Spent', att3format = '.0f',
+	//att4 = 'numSr', att4alias = '% 65+', att4format = '.0f';
+	
+	var att1 = 'cleaned_rural_density', att1alias = 'Population Density', att1format = '.0f',
+	att2 = 'cleaned_rural_CountyGraduateRate4yr', att2alias =  '% of HS Graduates within 4yrs', att2format = '.0f',
+	att3 = 'cleaned_rural_CountySpendingPerStudent', att3alias = 'Avg School Spending Per Student', att3format = '.0f',
+	att4 = 'cleaned_rural_mean_sci', att4alias = 'Avg ACT Science Score', att4format = '.0f';
 
   // enter below all variables that should be normalized. If you would like to multiple the variables
 	// with a constant value enter them in multiplyBy array. If there is no need for multiplication,
 	// simply enter 1 for each value in multiplyBy.
-  var attributesToBeNormalized = [att1, att4];
-	var multiplyBy = [10000, 100];
-	var divideBy = ['Population', 'Population'];
+ // var attributesToBeNormalized = [];
+	//var multiplyBy = [];
+	//var divideBy = [];
 	// if your variables are not raw counts and they are already normalized, comment out above, and
 	//uncomment below:
-	// var attributesToBeNormalized = [];
-	// var multiplyBy = [];
-	// var divideBy = [];
+	var attributesToBeNormalized = [];
+	 var multiplyBy = [];
+	 var divideBy = [];
 
 	//DO NOT CHANGE ANYTHING BELOW THIS POINT UNLESS YOU KNOW WHAT YOU ARE DOING
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -533,5 +515,97 @@
 				}
 				</script>
 				<!-- javascript -->
+
+
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-sm-12 portfolio-item">
+      <div class="card h-100">
+        <div class="card-body">
+          <h4 class="card-title">
+            <p>Discussion of Spatial Patterns</p>
+          </h4>
+          <p class="card-text">
+          	This map considers connections between educational resource 
+			investment (as measured through variables such as spending 
+			per student) and measures of student success (as measured
+			through variables such as ACT science scores and graduation
+			rate within 4 years. 
+			
+			The spatial patterns can be viewed from classes ranging in size
+			from 3-7 classes. When using the quantile classification, 
+			unfortunately, the disparity of population density between Iowa
+			counties is masked, with less densely populated areas placed in 
+			the same class as the more rare, urban spaces such as Des Moines. 
+			While for some projects, this may not be an issue, however, given 
+			that the purpose of this work is to show how investment in education
+			may be tied to population density, this classification fails by 
+			grouping non-urban spaces into more urban areas, as the quantile 
+			classification requires an equal number of features in each class
+			regardless of their similarity or dissimilarity. This can be 
+			somewhat mediated by selecting more classes, however, note that
+			even with seven classes, the final class in the population 
+			density map is 76-890, while all other classes have a much 
+			smaller range. Given this obscurity, its difficult to draw
+			meaningful comparisons between population density and the other
+			variables, especially considering the other variables are not 
+			nearly as diverse in their values.
+			
+			The equal interval classification is interesting. In terms of 
+			population density, this map performs better than quantile 
+			in terms of depicting the disparity of rural versus urban 
+			spaces. Although, the color scheme fails as, depending on the 
+			number of classes, it can be difficult to differentiate between
+			colors since they are so sparse. In terms of the other variables, 
+			it seems that generally counties do not struggle to have students
+			graduate, although the more eastern counties are lighter than 
+			the rest of the counties, indicating less graduates. Although, 
+			I had anticipated seeing a pattern of more urban spaces investing
+			more in their students, this pattern was not present in the 
+			equal interval classification. There was not a clear pattern 
+			in ACT scores. However, this classification also has downsides,
+			including, for instance, that two counties which share the same 
+			value may be in different classes--for instance, Lee County in 
+			the Percentage of Student Graduates map has a value of 88, while Wright
+			County also has a value of 88, yet both are in different classes. 
+			This also creates a false visual, as counties of the same value
+			should be in the same class. 
+			
+			Lastly, with the natural breaks classification, these maps can
+			only be evaluated individually, as this classification is not 
+			conducive to comparison as they each follow different break
+			structures. Individually, the maps do seem to better show the
+			underlying spatial structure of the data, as values dissimilar 
+			values are not forced together into the same class. Again, the 
+			ACT scores do not seem to have a clear spatial pattern. It is 
+			possible that only students who are planning to go to college
+			take the ACT score and, as a result, they may not be great indicators
+			of student success. Another element which became evident when
+			viewing the maps was that one of the counties that spends the 
+			most on their students (Van Buren) does not have associated ACT
+			score values (NaN), which is unfortunate in evaluating trends
+			of investment and measures of student success. Again, however, 
+			this classification is not supposed to be used to compare against
+			each other, but it did make some of the individual patterns
+			more obvious. 
+			
+			
+			
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.container-fluid {
+  width: 80%;
+  margin: 0 auto;
+}
+</style>
+
+
+
 
 			</body>
