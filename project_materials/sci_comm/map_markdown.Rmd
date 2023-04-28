@@ -1,0 +1,86 @@
+---
+title: "final_map"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+rm(list=ls())
+library(readr)
+library(choroplethr)
+library(choroplethrMaps)
+library(dplyr)
+library(ggplot2) 
+library(plotly)
+library(tmap)
+library(sf)
+library(tmaptools)
+
+```
+
+
+
+```{r}
+my_map <- st_read("shapefiles/iowa_attributes.geojson")
+my_data <- data.frame(my_map)
+
+#my_subset <- subset(my_map, CountyName == "polk" & is.na(cleaned_rural_density))
+my_map$cleaned_rural_density[is.na(my_map$cleaned_rural_density)] <- 890.120209059234
+
+# my_map <- my_map[complete.cases(my_map$cleaned_rural_density),]
+
+# Convert size variable to numeric and remove missing values
+my_map$cleaned_rural_density <- as.numeric(my_map$cleaned_rural_density)
+my_map$cleaned_rural_mean_sci <- as.numeric(my_map$cleaned_rural_mean_sci)
+my_map$cleaned_rural_CountyGraduateRate4yr <- as.numeric(my_map$cleaned_rural_CountyGraduateRate4yr)
+as.numeric(my_map$cleaned_rural_CountySpendingPerStudent)
+
+my_map$binned_science <- as.numeric(my_map$cleaned_rural_mean_sci)
+my_map$binned_science <- cut(my_map$cleaned_rural_mean_sci,
+                             breaks = c(19, 20, 21, 23),
+                             labels = c(1, 2, 3))
+my_map$binned_science <- as.numeric(my_map$binned_science)
+
+
+my_map <- my_map[complete.cases(my_map$cleaned_rural_CountyGraduateRate4yr),]
+
+#palette = c("#a6bddb", "#3690c0", "#034e7b"), 
+#palette = c("#8c510a", "#d8b365", "#7fbf7b"),
+
+tm_shape(my_map) +
+  tm_fill("cleaned_rural_density", style = "quantile", n = 5, palette = "Greys", title = "Density") +
+  tm_bubbles(size = "binned_science",
+             col = "blue",
+             palette = c("#a6bddb", "#3690c0", "#034e7b"), 
+             n = 3, 
+             alpha = .8, 
+             style = "quantile", 
+             title.col="Graduates in 4yrs", 
+             legend.size.is.portrait=TRUE,
+             sizes.legend=c(80,90,100), 
+             sizes.legend.labels=c("80%","90%","100%"), 
+             scale = 1.75) +
+  tm_layout(frame = FALSE, bg.color = "darkgrey") +
+  tm_legend(outside = TRUE, 
+            outside.position = "bottom", 
+            bg.color = "transparent", 
+            frame = FALSE)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,144 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-04-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls())
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(gganimate)
+library(tidyr)
+library(sf)
+library(choroplethr)
+library(choroplethrMaps)
+library(transformr)
+library(echarts4r)
+library(jsonlite)
+```
+
+
+```{r}
+df <- read_csv("~/Desktop/total_df.csv")
+
+df <- df %>%
+  group_by(county) %>%
+  fill(county_name, .direction = "down")
+
+
+df$k12_enrollment <- as.numeric(df$k12_enrollment)
+df$total_reduced_free <- as.numeric(df$total_reduced_free)
+
+new_df <- df %>%
+  group_by(county_name, year) %>%
+  summarise(per_reduced_county = mean(total_reduced_free, na.rm = TRUE) / mean(k12_enrollment, na.rm = TRUE)) %>%
+  na.omit()
+
+```
+
+
+```{r}
+county_shapefile <- st_read("shapefiles/original_Iowa/IowaCounties.shp")
+
+merged_df <- merge(new_df, county_shapefile, by.x = "county_name", by.y = "CountyName")
+
+plot(county_shapefile)
+```
+
+```{r}
+
+# st_is_valid(merged_df$geometry)
+st_crs(merged_df)
+
+map_anim <- ggplot(merged_df) +
+  geom_sf(aes(geometry = geometry, fill = per_reduced_county)) +
+  scale_fill_gradient(low = "white", high = "blue") +
+  #labs(title = "Percentage of Reduced-Free Lunch Eligible Students by County",
+  #     subtitle = "Year: {frame_time}") +
+  transition_time(year) 
+  #ease_aes('linear')
+
+# Save animation
+#anim_save("reduced_lunch_eligibility.gif", map_anim, width = 800, height = 600, fps = 10)
+
+#ggplot(merged_df) +
+#  geom_sf(aes(geometry = geometry, fill = per_reduced_county)) +
+#  scale_fill_gradient(low = "white", high = "blue") 
+
+```
+
+
+```{r}
+merged_df %>%
+  group_by(year) %>%
+  e_chart(county_name, timeline = TRUE) %>%
+  e_map(per_reduced_county) %>%
+  e_visual_map(min= 30, max= 90,
+               type = 'piecewise') %>%
+  e_title("Life expectancy by country and year", left = "center") %>%
+  e_tooltip(
+    trigger = "item",
+    formatter = e_tooltip_choro_formatter())
+
+```
+
+
+
+```{r}
+
+library(highcharter)
+
+# Convert merged_df to a format that highcharter can use
+iowa_map <- merged_df %>%
+  filter(!is.na(county_name)) %>%
+  group_by(county_name, year) %>%
+  summarize(per_reduced_county = mean(per_reduced_county)) %>%
+  pivot_wider(names_from = "year", values_from = "per_reduced_county", values_fill = NA)
+
+# Create the map
+hchart(iowa_map, "map", hcaes(name = county_name, value = `2021`), group = "year") %>%
+  hc_colorAxis(min = 30, max = 90, type = "piecewise") %>%
+  hc_title(text = "Percentage of Reduced-Free Lunch Eligible Students by County",
+           align = "center") %>%
+  hc_subtitle(text = "Year: {point.key}", align = "center") %>%
+  hc_tooltip(pointFormat = "<b>{point.name}</b><br>{series.name}: {point.value}%") 
+
+```
+
+```{r}
+# Read in the Iowa state GeoJSON file
+iowa_geojson <- st_read("shapefiles/iowa_attributes.geojson")
+
+plot(iowa_geojson)
+
+# Merge the data with the Iowa state boundary
+merged_df <- merge(new_df, iowa_geojson, by.x = "county_name", by.y = "CountyName")
+
+# Create an interactive map with eCharts4R
+merged_df |>
+  e_charts(county_name) |>
+  e_map_register("Iowa", iowa_geojson) |>
+  e_map(per_reduced_county, map = "Iowa") |>
+  e_visual_map(per_reduced_county)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
