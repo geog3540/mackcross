@@ -25,7 +25,7 @@ library(jsonlite)
 
 
 ```{r}
-df <- read_csv("~/Desktop/total_df.csv")
+df <- read_csv("total_df.csv")
 
 df <- df %>%
   group_by(county) %>%
@@ -46,9 +46,6 @@ new_df <- df %>%
 ```{r}
 county_shapefile <- st_read("shapefiles/original_Iowa/IowaCounties.shp")
 
-merged_df <- merge(new_df, county_shapefile, by.x = "county_name", by.y = "CountyName")
-
-plot(county_shapefile)
 ```
 
 ```{r}
