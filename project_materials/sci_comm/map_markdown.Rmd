@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 rm(list=ls())
 library(readr)
-library(choroplethr)
+#library(choroplethr)
 library(choroplethrMaps)
 library(dplyr)
 library(ggplot2) 
