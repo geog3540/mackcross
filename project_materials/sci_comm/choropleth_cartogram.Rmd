@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
+rm(list=ls())
 library(pacman)
 pacman::p_unload(pacman::p_loaded(), character.only = TRUE)
 library(rgdal)
