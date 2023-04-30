@@ -1,23 +1,37 @@
+rm(list=ls())
+
 library(readr)
 library(dplyr)
+library(rgdal)
 
-df <- read_csv("Documents/research/primate_map/project_materials/sci_comm/total_df.csv")
+# Fill in missing csv values
+df <- read_csv("total_df.csv")
 
-df$total_reduced_free <- as.numeric(df$total_reduced_free)
-df$k12_enrollment <- as.numeric(df$k12_enrollment)
+df$county_name <- gsub("'", "", df$county_name)
+df$county_name <- gsub("OBrien", "Obrien", df$county_name)
 
-grouped <- df %>%
-  group_by(county, year) %>%
-  summarize(import_ratio = sum(k12_enrollment) / sum(total_reduced_free))
-head(grouped)
+library(dplyr)
+df_filled <- df %>%
+  group_by(county) %>%
+  mutate(county_name = ifelse(is.na(county_name), county_name[!is.na(county_name)][1], county_name))
 
-grouped <- df %>%
-  group_by(county_name, year) %>%
+
+my_shapefile <- readOGR(dsn = "shapefiles/original_Iowa/IowaCounties.shp")
+
+
+merged_df <- merge(df_filled, my_shapefile@data[c("CountyName", "OBJECTID")], 
+                   by.x = "county_name", by.y = "CountyName", all.x = TRUE)
+
+merged_df$total_reduced_free <- as.numeric(merged_df$total_reduced_free)
+merged_df$k12_enrollment <- as.numeric(merged_df$k12_enrollment)
+
+grouped <- merged_df %>%
+  group_by(OBJECTID, county_name, year) %>%
   summarize(import_ratio = sum(k12_enrollment, na.rm = TRUE) / sum(total_reduced_free, na.rm = TRUE),
             .groups = "drop")
 head(grouped)
 
-write.csv(grouped, "Documents/research/primate_map/project_materials/sci_comm/grouped_data.csv", row.names = FALSE)
+write.csv(grouped, "grouped_data.csv", row.names = FALSE)
 
 
 
