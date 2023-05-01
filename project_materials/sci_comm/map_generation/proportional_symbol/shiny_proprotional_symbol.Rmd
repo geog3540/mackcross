@@ -1,6 +1,8 @@
 ---
 output: html_document
+runtime: shiny
 ---
+
 
 ```{r setup, include=FALSE, echo=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
@@ -407,10 +409,5 @@ tm_shape(my_map) +
 # Run the app
 shinyApp(ui = ui, server = server)
 ```
-
-
-
-
-
 
 
